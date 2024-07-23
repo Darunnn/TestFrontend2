@@ -7,15 +7,21 @@ import { RootState } from './store';
 import { FlagOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
-
+interface CitizenIdParts {
+  part1: string;
+  part2: string;
+  part3: string;
+  part4: string;
+  part5: string;
+}
 interface Person {
   id: number;
   title: string;
   firstname: string;
   lastname: string;
   birthday: string;
-  nationality: string;
-  citizenId: string;
+  nationality: 'American' | 'Canadian' | 'British';
+  citizenId: CitizenIdParts;
   gender: 'Male' | 'Female' | 'Unisex';
   mobilePhone: string;
   passportNo: string;
@@ -29,22 +35,26 @@ const App: React.FC = () => {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [countryCode, setCountryCode] = useState('+66');
   const { t, i18n } = useTranslation();
+  const [editingPerson, setEditingPerson] = useState<Person | null>(null);
 
-  const onFinish = (values: Omit<Person, 'id'>) => {
+  const onFinish = (values: Omit<Person, 'id'> & { citizenId: CitizenIdParts }) => {
     const personData: Person = {
       ...values,
-      id: Date.now(),
+      id: editingPerson ? editingPerson.id : Date.now(),
       expectedSalary: Number(values.expectedSalary),
       mobilePhone: `${countryCode}${values.mobilePhone}`,
+      citizenId: values.citizenId 
     };
 
-    if ('id' in values) {
-      dispatch(updatePerson(personData));
+    if (editingPerson) {
+      dispatch(updatePerson(personData)); 
     } else {
-      dispatch(addPerson(personData));
+      dispatch(addPerson(personData)); 
     }
     form.resetFields();
+    setEditingPerson(null);
   };
+
 
   const columns = [
     {
@@ -70,6 +80,7 @@ const App: React.FC = () => {
       title: t('nationality'),
       dataIndex: 'nationality',
       key: 'nationality',
+      render: (nationality: string | undefined) => nationality ? t(nationality.toLowerCase()) : '',
     },
     {
       title: t('manage'),
@@ -84,7 +95,15 @@ const App: React.FC = () => {
   ];
 
   const handleEdit = (record: Person) => {
-    form.setFieldsValue(record);
+    const countryCode = record.mobilePhone.slice(0, 3);
+    const phoneNumber = record.mobilePhone.slice(3);
+    form.setFieldsValue({
+      ...record,
+      mobilePhone: phoneNumber,
+      citizenId: record.citizenId
+    });
+    setCountryCode(countryCode);
+    setEditingPerson(record);
   };
 
   const handleDelete = (id: number) => {
@@ -125,6 +144,7 @@ const App: React.FC = () => {
           </Select>
         </Col>
       </Row>
+
       <Form<Person> form={form} onFinish={onFinish} layout="vertical" style={{ background: 'transparent', padding: '20px', borderRadius: '8px', margin: 'auto', marginBottom: '20px', border: '1px solid', width: '80%' }}>
         <Row gutter={16}>
           <Col span={3}>
@@ -156,16 +176,17 @@ const App: React.FC = () => {
           <Col span={6}>
             <Form.Item name="nationality" label={t('nationality')} rules={[{ required: true }]}>
               <Select placeholder={t('selectNationality')}>
-                <Option value="american">{t('American')}</Option>
-                <Option value="canadian">{t('Canadian')}</Option>
-                <Option value="british">{t('British')}</Option>
+                <Option value="american">{t('american')}</Option>
+                <Option value="canadian">{t('canadian')}</Option>
+                <Option value="british">{t('british')}</Option>
               </Select>
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item name="citizenId" label={t('citizenId')}>
-          <Input.Group compact>
+        <Form.Item name="citizenId" label={t('citizenId')} >
+          <Form.Item name={['citizenId', 'part1']} noStyle>
             <Input
+              id='input1'
               style={{ width: '5%', marginRight: '10px', textAlign: 'center' }}
               maxLength={1}
               onChange={(e) => {
@@ -174,8 +195,10 @@ const App: React.FC = () => {
                 }
               }}
             />-
+          </Form.Item>
+          <Form.Item name={['citizenId', 'part2']} noStyle>
             <Input
-              id="input2"
+              id='input2'
               style={{ width: '15%', marginInline: '10px', textAlign: 'center' }}
               maxLength={4}
               onChange={(e) => {
@@ -184,8 +207,10 @@ const App: React.FC = () => {
                 }
               }}
             />-
+          </Form.Item>
+          <Form.Item name={['citizenId', 'part3']} noStyle>
             <Input
-              id="input3"
+              id='input3'
               style={{ width: '15%', marginInline: '10px', textAlign: 'center' }}
               maxLength={5}
               onChange={(e) => {
@@ -193,9 +218,11 @@ const App: React.FC = () => {
                   (document.getElementById('input4') as HTMLInputElement)?.focus();
                 }
               }}
-            />-
+            />
+          </Form.Item>
+          <Form.Item name={['citizenId', 'part4']} noStyle>
             <Input
-              id="input4"
+              id='input4'
               style={{ width: '10%', marginInline: '10px', textAlign: 'center' }}
               maxLength={2}
               onChange={(e) => {
@@ -203,13 +230,15 @@ const App: React.FC = () => {
                   (document.getElementById('input5') as HTMLInputElement)?.focus();
                 }
               }}
-            />-
+            />
+          </Form.Item>
+          <Form.Item name={['citizenId', 'part5']} noStyle>
             <Input
-              id="input5"
+              id='input5'
               style={{ width: '5%', marginInline: '10px', textAlign: 'center' }}
               maxLength={1}
             />
-          </Input.Group>
+          </Form.Item>
         </Form.Item>
         <Form.Item name="gender" label={t('gender')} rules={[{ required: true }]}>
           <Radio.Group>
@@ -220,7 +249,7 @@ const App: React.FC = () => {
         </Form.Item>
         <Form.Item label={t('mobilePhone')} rules={[{ required: true }]}>
           <Input.Group compact>
-            <Select defaultValue={countryCode} onChange={setCountryCode} style={{ width: '10%',marginRight:'10px' }}>
+            <Select defaultValue={countryCode} onChange={setCountryCode} style={{ width: '10%', marginRight: '10px' }}>
               {countryOptions.map(({ code, icon }) => (
                 <Option key={code} value={code}>
                   {code}
@@ -228,7 +257,7 @@ const App: React.FC = () => {
               ))}
             </Select>-
             <Form.Item name="mobilePhone" noStyle>
-              <Input style={{ width: '40%', marginInline:'10px'}} />
+              <Input style={{ width: '40%', marginInline: '10px' }} />
             </Form.Item>
           </Input.Group>
         </Form.Item>
@@ -244,9 +273,11 @@ const App: React.FC = () => {
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item >
+        <Form.Item>
           <Button style={{ margin: '10px' }} type="default" onClick={() => form.resetFields()}>{t('reset')}</Button>
-          <Button style={{ margin: '10px' }} type="primary" htmlType="submit">{t('submit')}</Button>
+          <Button style={{ margin: '10px' }} type="primary" htmlType="submit">
+            {editingPerson ? t('update') : t('submit')}
+          </Button>
         </Form.Item>
       </Form>
       <div style={{ marginBottom: '20px' }}>
@@ -257,7 +288,9 @@ const App: React.FC = () => {
         >
           {t('selectAll')}
         </Checkbox>
-        <Button danger onClick={handleDeleteMultiple} disabled={selectedRows.length === 0}>{t('delete')}</Button>
+        <Button danger onClick={handleDeleteMultiple} disabled={selectedRows.length === 0}>
+          {t('delete')}
+        </Button>
       </div>
 
       <Table<Person>
@@ -278,3 +311,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+

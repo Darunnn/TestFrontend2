@@ -13,6 +13,9 @@ interface TranslationKeys {
   male: string;
   female: string;
   unisex: string;
+  american:string,
+  canadian:string,
+  british:string,
   mobilePhone: string;
   passportNo: string;
   expectedSalary: string;
@@ -24,6 +27,7 @@ interface TranslationKeys {
   manage: string;
   name: string;
   totalItems: string;
+  update:string;
 }
 
 interface Resources {
@@ -46,6 +50,9 @@ const resources: Resources = {
       male: 'Male',
       female: 'Female',
       unisex: 'Unisex',
+      american:'American',
+      canadian:'Canadian',
+      british:'British',
       mobilePhone: 'Mobile Phone',
       passportNo: 'Passport No',
       expectedSalary: 'Expected Salary',
@@ -57,6 +64,7 @@ const resources: Resources = {
       manage: 'MANAGE',
       name: 'Name',
       totalItems: 'Total {{total}} items',
+      update:'update',
     },
   },
   th: {
@@ -72,6 +80,9 @@ const resources: Resources = {
       male: 'ชาย',
       female: 'หญิง',
       unisex: 'ไม่ระบุ',
+      american:'อเมริกา',
+      canadian:'แคนนาดา',
+      british:'อังกฤษ',
       mobilePhone: 'เบอร์โทรศัพท์',
       passportNo: 'เลขที่หนังสือเดินทาง',
       expectedSalary: 'เงินเดือนที่คาดหวัง',
@@ -83,6 +94,7 @@ const resources: Resources = {
       manage: 'จัดการ',
       name: 'ชื่อ',
       totalItems: 'ทั้งหมด {{total}} รายการ',
+      update:'อัพเดต',
     },
   },
 };
